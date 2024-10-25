@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart with Shadow and Animated Text</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Thay đổi hướng để cho nút nằm dưới khung */
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            position: relative;
+            overflow: hidden;
+            background-color: #f0e4fc; /* Màu nền mặc định */
+        }
+        .heart-background {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 500px; /* Kích thước trái tim mờ */
+            height: 500px;
+            background: rgba(255, 182, 193, 0.3); /* Màu hồng nhạt mờ */
+            transform: translate(-50%, -50%);
+            border-radius: 50%; /* Biến thành hình tròn */
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); /* Tạo hình trái tim */
+            filter: blur(10px); /* Làm mờ */
+            z-index: 0; /* Đặt ở dưới cùng */
+        }
+        #canvasContainer {
+            position: relative;
+            z-index: 1; /* Đặt trên cùng */
+            margin-bottom: 20px;
+        }
+        #frame {
+            border: 5px solid pink; /* Khung màu hồng */
+            padding: 10px; /* Khoảng cách giữa khung và canvas */
+            display: inline-block; /* Để hiển thị khung đúng cách */
+            border-radius: 15px; /* Bo tròn góc của khung */
+        }
+        canvas {
+            border: 1px solid #ccc;
+            background-color: #f0e4fc; /* Nền trong hình vuông cùng màu với nền web */
+        }
+        #textInput {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px; /* Tăng kích thước chữ */
+            font-weight: bold;
+            text-align: center;
+            color: #000000;
+            max-width: 80%;
+            line-height: 1.5;
+            display: none;
+        }
+        #showTextButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1; /* Đặt trên cùng */
+            margin-top: 20px; /* Thêm khoảng cách với khung trái tim */
+        }
+        #showTextButton:hover {
+            background-color: #45a049;
+        }
+        
+        /* Các hình trái tim nhỏ */
+        .heart {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 192, 203, 0.6);
+            transform: rotate(45deg);
+            animation: float 5s infinite ease-in-out;
+        }
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 192, 203, 0.6);
+            border-radius: 50%;
+        }
+        .heart::before {
+            top: -15px;
+            left: 0;
+        }
+        .heart::after {
+            left: 15px;
+            top: 0;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(45deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(45deg);
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="heart-background"></div> <!-- Hình trái tim mờ -->
+<div id="canvasContainer">
+    <div id="textInput"></div>
+    <div id="frame"> <!-- Khung màu hồng -->
+        <canvas id="heartCanvas" width="400" height="400"></canvas>
+    </div>
+</div>
+<button id="showTextButton">Nhận lời</button>
+
+<script>
+    function drawHeart() {
+        const canvas = document.getElementById('heartCanvas');
+        const context = canvas.getContext('2d');
+
+        // Thêm gradient cho trái tim
+        const gradient = context.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, "#ff758c");
+        gradient.addColorStop(1, "#ff7eb3");
+
+        // Xóa nền và thiết lập bóng cho trái tim
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.shadowColor = "rgba(0, 0, 0, 0.3)";
+        context.shadowBlur = 20;
+        context.shadowOffsetX = 10;
+        context.shadowOffsetY = 10;
+
+        // Vẽ trái tim tròn với bóng
+        context.beginPath();
+        context.moveTo(200, 250);
+        context.bezierCurveTo(100, 150, 100, 320, 200, 360);
+        context.bezierCurveTo(300, 320, 300, 150, 200, 250);
+
+        context.fillStyle = gradient;
+        context.fill();
+        context.strokeStyle = '#c9302c';
+        context.lineWidth = 3;
+        context.stroke();
+        context.closePath();
+    }
+
+    function displayText() {
+        const text = "vợ cố lên\nchồng yêu vợ lắm";
+        const textInput = document.getElementById('textInput');
+        let index = 0;
+        textInput.style.display = 'block';
+
+        function typeCharacter() {
+            if (index < text.length) {
+                textInput.innerHTML += text[index] === "\n" ? "<br>" : text[index];
+                index++;
+                setTimeout(typeCharacter, 100);
+            }
+        }
+        typeCharacter();
+    }
+
+    document.getElementById('showTextButton').addEventListener('click', function() {
+        displayText();
+        this.style.display = 'none';
+    });
+
+    drawHeart();
+
+    // Tạo hình trái tim nhỏ động
+    function createHearts() {
+        for (let i = 0; i < 15; i++) {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.style.top = `${Math.random() * 100}vh`;
+            heart.style.left = `${Math.random() * 100}vw`;
+            document.body.appendChild(heart);
+        }
+    }
+
+    createHearts();
+</script>
+
+</body>
+</html>
